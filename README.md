@@ -1,0 +1,1 @@
+# panini-mundial-2026
