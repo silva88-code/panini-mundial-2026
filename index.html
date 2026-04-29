@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestor Panini Mundial 2026</title>
+  <style>
+    :root {
+      --bg:#070a12; --card:#111827; --card2:#0b1220; --text:#e5e7eb; --muted:#94a3b8;
+      --border:#243047; --primary:#38bdf8; --green:#86efac; --red:#fca5a5; --shadow:0 16px 40px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(circle at top left,rgba(56,189,248,.18),transparent 35%),radial-gradient(circle at top right,rgba(168,85,247,.15),transparent 32%),var(--bg);color:var(--text);min-height:100vh}
+    header,main{max-width:1280px;margin:auto;padding:18px}
+    .hero{margin-top:12px;background:linear-gradient(135deg,rgba(15,23,42,.96),rgba(17,24,39,.90));border:1px solid var(--border);border-radius:28px;padding:28px;box-shadow:var(--shadow)}
+    .tag{color:var(--primary);text-transform:uppercase;font-size:13px;font-weight:800;letter-spacing:.08em;margin-bottom:10px}
+    h1{margin:0;font-size:clamp(28px,5vw,46px)}
+    p{margin:10px 0 0;color:var(--muted);line-height:1.5}
+    .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin:18px 0}
+    .card{background:linear-gradient(180deg,rgba(17,24,39,.98),rgba(11,18,32,.98));border:1px solid var(--border);border-radius:22px;padding:16px;box-shadow:var(--shadow)}
+    .stat-label{color:var(--muted);font-size:13px}.stat-value{font-weight:900;font-size:30px;margin-top:6px}
+    .controls{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+    input,select,button{border:1px solid var(--border);border-radius:14px;padding:12px;font-size:14px;background:var(--card2);color:var(--text);outline:none}
+    input::placeholder{color:#64748b}
+    button{cursor:pointer;background:linear-gradient(135deg,#0ea5e9,#2563eb);color:white;border:none;font-weight:800}
+    button.secondary{background:var(--card2);border:1px solid var(--border);color:var(--text)}
+    button.danger{background:linear-gradient(135deg,#b91c1c,#7f1d1d)}
+    .actions{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:12px}
+    .notice{color:#bae6fd;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.25);padding:12px 14px;border-radius:16px;font-size:13px;line-height:1.45;margin-top:12px}
+    .status{color:var(--muted);font-size:13px;margin-top:10px;line-height:1.5}.status strong{color:var(--text)}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+    .tab{padding:9px 12px;border-radius:999px;background:var(--card2);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:13px;font-weight:700}
+    .tab.active{background:var(--primary);color:#00111f;border-color:var(--primary)}
+    .bar{height:10px;background:#0b1220;border:1px solid var(--border);border-radius:999px;overflow:hidden;margin-top:10px;display:none}
+    .bar div{height:100%;width:0;background:linear-gradient(90deg,#38bdf8,#a78bfa);transition:width .2s}
+    .table-wrap{background:rgba(17,24,39,.96);border-radius:22px;overflow-x:auto;border:1px solid var(--border);box-shadow:var(--shadow)}
+    table{width:100%;min-width:1120px;border-collapse:collapse;font-size:14px}
+    th,td{padding:12px;border-bottom:1px solid rgba(36,48,71,.8);text-align:left;vertical-align:middle}
+    th{background:var(--card2);color:var(--muted);font-size:12px;position:sticky;top:0;z-index:1;text-transform:uppercase;letter-spacing:.04em}
+    tr:hover{background:rgba(56,189,248,.045)}tr.owned{background:rgba(34,197,94,.045)}
+    .checkbox{width:22px;height:22px;accent-color:#22c55e;cursor:pointer}
+    .badge{display:inline-block;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:900;white-space:nowrap}
+    .badge.have{background:rgba(34,197,94,.13);color:var(--green)}.badge.missing{background:rgba(239,68,68,.13);color:var(--red)}
+    .pill{display:inline-block;padding:4px 9px;border-radius:999px;background:rgba(168,85,247,.14);color:#d8b4fe;font-size:12px;font-weight:900;white-space:nowrap}
+    .empty{padding:28px;text-align:center;color:var(--muted)}
+    @media(max-width:880px){.stats{grid-template-columns:repeat(2,1fr)}.controls{grid-template-columns:1fr}.actions button{flex:1 1 auto}}
+  </style>
+</head>
+<body>
+<header>
+  <section class="hero">
+    <div class="tag">⚽ Panini FIFA World Cup 2026</div>
+    <h1>Gestor da Caderneta</h1>
+    <p>Modo dark, checkbox para marcar cromos, repetidos, notas, filtros e checklist local completa. Já inclui <strong>QAT1 / Catar 1</strong>.</p>
+  </section>
+</header>
+
+<main>
+  <section class="stats">
+    <div class="card"><div class="stat-label">Total</div><div class="stat-value" id="statTotal">0</div></div>
+    <div class="card"><div class="stat-label">Tenho</div><div class="stat-value" id="statHave">0</div></div>
+    <div class="card"><div class="stat-label">Faltam</div><div class="stat-value" id="statMissing">0</div></div>
+    <div class="card"><div class="stat-label">Repetidos</div><div class="stat-value" id="statRepeated">0</div></div>
+    <div class="card"><div class="stat-label">Completo</div><div class="stat-value" id="statPercent">0%</div></div>
+  </section>
+
+  <section class="card">
+    <div class="controls">
+      <input id="searchInput" placeholder="Pesquisar número, código, jogador/cromo ou seleção">
+      <select id="teamFilter"></select>
+      <select id="rarityFilter"></select>
+      <select id="statusFilter">
+        <option value="all">Todos</option>
+        <option value="have">Tenho</option>
+        <option value="missing">Faltam</option>
+        <option value="repeated">Repetidos</option>
+      </select>
+    </div>
+
+    <div class="actions">
+      <button onclick="loadLocalChecklist()">Carregar checklist local completa</button>
+      <button class="secondary" onclick="tryUpdateNamesOnline()">Tentar atualizar nomes online</button>
+      <button class="secondary" onclick="exportAll()">Exportar coleção</button>
+      <button class="secondary" onclick="exportMissing()">Exportar faltas</button>
+      <button class="secondary" onclick="exportRepeated()">Exportar repetidos</button>
+      <button class="secondary" onclick="document.getElementById('importFile').click()">Importar backup</button>
+      <button class="danger" onclick="resetProgress()">Apagar progresso</button>
+      <input id="importFile" type="file" accept="application/json" style="display:none">
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="setStatusFilter('all', this)">Todos</button>
+      <button class="tab" onclick="setStatusFilter('missing', this)">Só faltas</button>
+      <button class="tab" onclick="setStatusFilter('have', this)">Só tenho</button>
+      <button class="tab" onclick="setStatusFilter('repeated', this)">Só repetidos</button>
+    </div>
+
+    <div class="status" id="statusText"><strong>Estado:</strong> checklist local carregada.</div>
+    <div class="bar" id="progressBarWrap"><div id="progressBar"></div></div>
+    <div class="notice">
+      Esta versão não fica vazia: a checklist é gerada localmente com 980 entradas-base: 20 especiais + 48 seleções × 20 cromos.
+      O botão online é opcional e só tenta preencher nomes quando a fonte externa permitir.
+    </div>
+  </section>
+
+  <br>
+
+  <section class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Tenho</th><th>N.º</th><th>Código</th><th>Seleção</th><th>Jogador/Cromo</th><th>Grupo</th><th>Posição</th><th>Raridade</th><th>Estado</th><th>Repetidos</th><th>Notas</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </section>
+</main>
+
+<script>
+const STORAGE_KEY = "panini_2026_dark_local_980_v1";
+
+const TEAMS = [
+  ["MEX","México","A"],["RSA","África do Sul","A"],["KOR","Coreia do Sul","A"],["POA","Play-off A","A"],
+  ["CAN","Canadá","B"],["SUI","Suíça","B"],["QAT","Catar","B"],["POB","Play-off B","B"],
+  ["BRA","Brasil","C"],["MAR","Marrocos","C"],["SCO","Escócia","C"],["HAI","Haiti","C"],
+  ["USA","Estados Unidos","D"],["PAR","Paraguai","D"],["AUS","Austrália","D"],["POC","Play-off C","D"],
+  ["GER","Alemanha","E"],["CIV","Costa do Marfim","E"],["ECU","Equador","E"],["CUW","Curaçau","E"],
+  ["NED","Países Baixos","F"],["JPN","Japão","F"],["TUN","Tunísia","F"],["POD","Play-off D","F"],
+  ["BEL","Bélgica","G"],["IRN","Irão","G"],["EGY","Egito","G"],["NZL","Nova Zelândia","G"],
+  ["ESP","Espanha","H"],["URU","Uruguai","H"],["KSA","Arábia Saudita","H"],["CPV","Cabo Verde","H"],
+  ["FRA","França","I"],["SEN","Senegal","I"],["NOR","Noruega","I"],["POE","Play-off E","I"],
+  ["ARG","Argentina","J"],["AUT","Áustria","J"],["ALG","Argélia","J"],["JOR","Jordânia","J"],
+  ["POR","Portugal","K"],["COL","Colômbia","K"],["UZB","Uzbequistão","K"],["POF","Play-off F","K"],
+  ["ENG","Inglaterra","L"],["CRO","Croácia","L"],["GHA","Gana","L"],["PAN","Panamá","L"]
+];
+
+const SPECIALS = [
+  ["PL000","Panini Logo - We Are Panini"],["FWC001","Official Emblem"],["FWC002","Official Emblem"],
+  ["FWC003","Official Mascots"],["FWC004","Official Slogan"],["FWC005","Official Ball"],
+  ["FWC006","Canada - Host Countries and Cities"],["FWC007","Mexico - Host Countries and Cities"],
+  ["FWC008","USA - Host Countries and Cities"],["FWC009","Trophy"],["FWC010","Tournament Map"],
+  ["FWC011","Stadium 1"],["FWC012","Stadium 2"],["FWC013","Stadium 3"],["FWC014","Stadium 4"],
+  ["FWC015","Stadium 5"],["FWC016","Stadium 6"],["FWC017","Stadium 7"],["FWC018","Stadium 8"],["FWC019","Official Poster"]
+];
+
+const SOURCES = [
+  "https://www.worldtradingcards.com/en/collections/panini-fifa-world-cup-2026-stickers?filter.p.m.custom.variedad=Base",
+  "https://centraldacopa.app/pt-pt/checklist/world-cup-2026"
+];
+
+const PROXIES = [
+  url => "https://api.allorigins.win/raw?url=" + encodeURIComponent(url),
+  url => "https://corsproxy.io/?" + encodeURIComponent(url)
+];
+
+let stickers = loadSaved();
+
+function buildLocalChecklist(){
+  const list = [];
+  SPECIALS.forEach((s, idx) => {
+    list.push({
+      id:s[0], number:idx+1, code:s[0], team:"FIFA World Cup 2026", name:s[1],
+      group:"SPECIAL", position:"SPECIAL", rarity:"foil", status:"missing", repeated:0, notes:""
+    });
+  });
+
+  TEAMS.forEach(([prefix, team, group]) => {
+    for(let i=1;i<=20;i++){
+      const code = prefix + i;
+      let name = "Cromo " + team + " " + i;
+      let position = "";
+      let rarity = "base";
+      if(i===1){ name = "Escudo " + team; position = "TEAM"; rarity = "foil"; }
+      if(i===13){ name = "Foto de equipa " + team; position = "TEAM"; rarity = "base"; }
+
+      list.push({
+        id:code, number:list.length+1, code, team, name, group, position, rarity,
+        status:"missing", repeated:0, notes:""
+      });
+    }
+  });
+
+  return list;
+}
+
+function loadSaved(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if(Array.isArray(saved) && saved.length) return ensureQAT1(saved.map(normalize));
+  }catch(e){}
+  return buildLocalChecklist();
+}
+
+function normalize(item, index=0){
+  return {
+    id:item.id || item.code || String(index+1),
+    number:Number(item.number || index+1),
+    code:item.code || "",
+    team:item.team || item.country || "",
+    name:item.name || item.player || "",
+    group:item.group || "",
+    position:item.position || "",
+    rarity:item.rarity || "",
+    status:item.status || (item.have ? "have" : "missing"),
+    repeated:Number(item.repeated || 0),
+    notes:item.notes || ""
+  };
+}
+
+function ensureQAT1(list){
+  if(!list.some(s => String(s.code).toUpperCase()==="QAT1")){
+    list.push({id:"QAT1",number:list.length+1,code:"QAT1",team:"Catar",name:"Escudo Catar",group:"B",position:"TEAM",rarity:"foil",status:"missing",repeated:0,notes:"Adicionado automaticamente."});
+  }
+  return list.map((s,i)=>({...s, number:i+1}));
+}
+
+function mergeKeepingProgress(newList){
+  const old = new Map(stickers.map(s => [String(s.code).toUpperCase(), s]));
+  return ensureQAT1(newList.map((s,i) => {
+    const previous = old.get(String(s.code).toUpperCase());
+    return {
+      ...normalize(s,i),
+      status: previous ? previous.status : "missing",
+      repeated: previous ? Number(previous.repeated||0) : 0,
+      notes: previous ? previous.notes : ""
+    };
+  }));
+}
+
+function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(stickers)); }
+
+function loadLocalChecklist(){
+  stickers = mergeKeepingProgress(buildLocalChecklist());
+  save(); setupFilters(); render();
+  setStatus("Checklist local completa carregada: " + stickers.length + " entradas. QAT1 incluído.");
+}
+
+async function tryUpdateNamesOnline(){
+  const old = new Map(stickers.map(s => [String(s.code).toUpperCase(), s]));
+  let found = [];
+  showProgress(true);
+  try{
+    for(const source of SOURCES){
+      for(let page=1; page<=19; page++){
+        const url = source.includes("worldtradingcards")
+          ? source + "&page=" + page
+          : source + (page===1 ? "" : "?page=" + page);
+        setStatus("A tentar atualizar nomes online: página " + page + "/19...");
+        progressBar.style.width = Math.round(page/19*100) + "%";
+        const html = await fetchText(url);
+        const parsed = parseWorldTradingCards(html).concat(parseCentral(html));
+        found.push(...parsed);
+      }
+      found = dedupe(found);
+      if(found.length > 100) break;
+    }
+
+    if(found.length < 50) throw new Error("Poucos itens encontrados.");
+
+    found.forEach(item => {
+      const key = String(item.code).toUpperCase();
+      const current = old.get(key);
+      if(current){
+        current.name = item.name || current.name;
+        current.team = item.team || current.team;
+        current.rarity = item.rarity || current.rarity;
+      }
+    });
+
+    stickers = ensureQAT1(Array.from(old.values()));
+    save(); setupFilters(); render();
+    setStatus("Atualização online concluída para " + found.length + " itens encontrados. Se faltarem nomes, a checklist local mantém-se funcional.");
+  }catch(e){
+    console.error(e);
+    setStatus("A atualização online falhou/bloqueou, mas a checklist local continua carregada e funcional.");
+  }finally{
+    showProgress(false);
+  }
+}
+
+async function fetchText(url){
+  let lastError;
+  for(const proxy of PROXIES){
+    try{
+      const res = await fetch(proxy(url));
+      if(!res.ok) throw new Error("HTTP " + res.status);
+      const text = await res.text();
+      if(text.length > 300) return text;
+    }catch(e){ lastError = e; }
+  }
+  throw lastError || new Error("Erro de rede");
+}
+
+function parseWorldTradingCards(html){
+  const text = htmlToText(html);
+  const regex = /#([A-Z]{2,6}\d{1,4}|FWC\d{1,4}|PL000)\s*\|\s*Panini\s*\|\s*Fifa World Cup Stickers\s*\|\s*2026\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([A-Za-zÀ-ÿ0-9 -]+)/g;
+  const arr = [];
+  let m;
+  while((m = regex.exec(text)) !== null){
+    arr.push({code:stripZeros(m[1]), name:clean(m[2]), team:translateTeam(clean(m[3])), rarity:clean(m[4])});
+  }
+  return arr;
+}
+
+function parseCentral(html){
+  const text = htmlToText(html);
+  const regex = /\b([A-Z]{2,6})0?(\d{1,3})\s*[-|]\s*([^-\|]+?)\s*[-|]\s*([^-\|]+?)\s*[-|]\s*(base|foil|common|rare|epic|legendary)/gi;
+  const arr = [];
+  let m;
+  while((m = regex.exec(text)) !== null){
+    arr.push({code:m[1].toUpperCase()+Number(m[2]), name:clean(m[3]), team:translateTeam(clean(m[4])), rarity:clean(m[5]).toLowerCase()});
+  }
+  return arr;
+}
+
+function stripZeros(code){
+  const m = String(code).toUpperCase().match(/^([A-Z]+)0*(\d+)$/);
+  if(!m) return code;
+  if(m[1]==="FWC") return "FWC" + String(Number(m[2])).padStart(3,"0");
+  return m[1] + Number(m[2]);
+}
+
+function htmlToText(html){
+  return String(html)
+    .replace(/<script[\s\S]*?<\/script>/gi," ")
+    .replace(/<style[\s\S]*?<\/style>/gi," ")
+    .replace(/<[^>]+>/g," ")
+    .replace(/&nbsp;/g," ")
+    .replace(/&amp;/g,"&")
+    .replace(/&quot;/g,'"')
+    .replace(/&#039;/g,"'")
+    .replace(/\s+/g," ")
+    .trim();
+}
+
+function clean(v){return String(v||"").replace(/\s+/g," ").trim();}
+
+function translateTeam(team){
+  const map = {"Qatar":"Catar","Brazil":"Brasil","France":"França","Spain":"Espanha","England":"Inglaterra","Germany":"Alemanha","Mexico":"México","Canada":"Canadá","United States":"Estados Unidos","USA":"Estados Unidos","Morocco":"Marrocos","Japan":"Japão","South Korea":"Coreia do Sul","Uruguay":"Uruguai","Colombia":"Colômbia","Saudi Arabia":"Arábia Saudita","Switzerland":"Suíça","Scotland":"Escócia","Netherlands":"Países Baixos","New Zealand":"Nova Zelândia","Ivory Coast":"Costa do Marfim","South Africa":"África do Sul","Cape Verde":"Cabo Verde"};
+  return map[team] || team;
+}
+
+function dedupe(list){
+  const map = new Map();
+  list.forEach(item => { if(item.code && !map.has(item.code)) map.set(item.code,item); });
+  return Array.from(map.values());
+}
+
+function setupFilters(){
+  const currentTeam = teamFilter.value || "all";
+  const currentRarity = rarityFilter.value || "all";
+  const teams = ["all", ...Array.from(new Set(stickers.map(s=>s.team).filter(Boolean))).sort((a,b)=>a.localeCompare(b))];
+  const rarities = ["all", ...Array.from(new Set(stickers.map(s=>s.rarity).filter(Boolean))).sort((a,b)=>a.localeCompare(b))];
+
+  teamFilter.innerHTML = teams.map(t => `<option value="${escAttr(t)}">${t==="all" ? "Todas as seleções" : esc(t)}</option>`).join("");
+  rarityFilter.innerHTML = rarities.map(r => `<option value="${escAttr(r)}">${r==="all" ? "Todas as raridades" : esc(r)}</option>`).join("");
+
+  if(teams.includes(currentTeam)) teamFilter.value = currentTeam;
+  if(rarities.includes(currentRarity)) rarityFilter.value = currentRarity;
+}
+
+function filteredStickers(){
+  const q = searchInput.value.toLowerCase();
+  const team = teamFilter.value;
+  const rarity = rarityFilter.value;
+  const status = statusFilter.value;
+  return stickers.filter(s => {
+    const text = `${s.number} ${s.code} ${s.team} ${s.name} ${s.group} ${s.position} ${s.rarity}`.toLowerCase();
+    return text.includes(q)
+      && (team==="all" || s.team===team)
+      && (rarity==="all" || s.rarity===rarity)
+      && (status==="all" || s.status===status || (status==="repeated" && Number(s.repeated)>0));
+  });
+}
+
+function render(){
+  updateStats();
+  const rows = filteredStickers().map(s => {
+    const have = s.status === "have";
+    return `<tr class="${have ? "owned" : ""}">
+      <td><input class="checkbox" type="checkbox" ${have ? "checked" : ""} onchange="toggleHave('${escAttr(s.id)}', this.checked)"></td>
+      <td><strong>${s.number}</strong></td>
+      <td><span class="pill">${esc(s.code || "-")}</span></td>
+      <td><strong>${esc(s.team)}</strong></td>
+      <td>${esc(s.name)}</td>
+      <td>${esc(s.group || "-")}</td>
+      <td>${esc(s.position || "-")}</td>
+      <td><span class="pill">${esc(s.rarity || "-")}</span></td>
+      <td><span class="badge ${have ? "have" : "missing"}">${have ? "Tenho" : "Falta"}</span></td>
+      <td><input type="number" min="0" value="${Number(s.repeated||0)}" onchange="updateField('${escAttr(s.id)}','repeated',Number(this.value))"></td>
+      <td><input value="${escAttr(s.notes)}" placeholder="ex: trocar com João" onchange="updateField('${escAttr(s.id)}','notes',this.value)"></td>
+    </tr>`;
+  }).join("");
+  tableBody.innerHTML = rows || `<tr><td colspan="11"><div class="empty">Sem resultados.</div></td></tr>`;
+}
+
+function updateStats(){
+  const total = stickers.length;
+  const have = stickers.filter(s=>s.status==="have").length;
+  const missing = total - have;
+  const repeated = stickers.reduce((sum,s)=>sum+Number(s.repeated||0),0);
+  const percent = total ? Math.round((have/total)*100) : 0;
+  statTotal.textContent = total;
+  statHave.textContent = have;
+  statMissing.textContent = missing;
+  statRepeated.textContent = repeated;
+  statPercent.textContent = percent + "%";
+}
+
+function toggleHave(id, checked){
+  stickers = stickers.map(s => String(s.id)===String(id) ? {...s,status:checked?"have":"missing"} : s);
+  save(); render();
+}
+
+function updateField(id, field, value){
+  stickers = stickers.map(s => String(s.id)===String(id) ? {...s,[field]:value} : s);
+  save(); render();
+}
+
+function setStatusFilter(value, btn){
+  statusFilter.value = value;
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  btn.classList.add("active");
+  render();
+}
+
+function exportAll(){download(stickers,"panini-mundial-2026-colecao.json");}
+function exportMissing(){download(stickers.filter(s=>s.status!=="have"),"panini-mundial-2026-faltas.json");}
+function exportRepeated(){download(stickers.filter(s=>Number(s.repeated)>0),"panini-mundial-2026-repetidos.json");}
+
+function download(data, filename){
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function resetProgress(){
+  if(!confirm("Queres apagar apenas o progresso? A checklist mantém-se.")) return;
+  stickers = stickers.map(s=>({...s,status:"missing",repeated:0,notes:""}));
+  save(); render(); setStatus("Progresso apagado. Checklist mantida.");
+}
+
+function showProgress(show){
+  progressBarWrap.style.display = show ? "block" : "none";
+  if(!show) progressBar.style.width = "0%";
+}
+
+function setStatus(text){ statusText.innerHTML = "<strong>Estado:</strong> " + esc(text); }
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
+function escAttr(v){return esc(v).replace(/`/g,"&#096;");}
+
+importFile.addEventListener("change", e => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const data = JSON.parse(reader.result);
+      if(!Array.isArray(data)) throw new Error("Inválido");
+      stickers = ensureQAT1(data.map(normalize));
+      save(); setupFilters(); render();
+      setStatus("Backup importado: " + stickers.length + " entradas.");
+    }catch(err){ alert("Ficheiro inválido."); }
+  };
+  reader.readAsText(file);
+});
+
+searchInput.addEventListener("input", render);
+teamFilter.addEventListener("change", render);
+rarityFilter.addEventListener("change", render);
+statusFilter.addEventListener("change", render);
+
+stickers = ensureQAT1(stickers);
+save();
+setupFilters();
+render();
+</script>
+</body>
+</html>
